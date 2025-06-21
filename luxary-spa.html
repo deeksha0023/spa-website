@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Luxury Spa Booking Popup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f2f5;
+    }
+
+    .open-modal-btn {
+      margin: 50px auto;
+      display: block;
+      padding: 15px 30px;
+      background: #111827;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .open-modal-btn:hover {
+      background: #1f2937;
+    }
+
+    /* Modal styling */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      animation: fadeInModal 0.3s ease forwards;
+    }
+
+    @keyframes fadeInModal {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+    @keyframes fadeOutModal {
+      from {opacity: 1;}
+      to {opacity: 0;}
+    }
+
+    .modal-content {
+      background: white;
+      width: 90%;
+      max-width: 1100px;
+      height: 90%;
+      display: flex;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      animation: scaleIn 0.4s ease forwards;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9);}
+      to { opacity: 1; transform: scale(1);}
+    }
+
+    .left-panel, .center-panel, .right-panel {
+      padding: 25px;
+      overflow-y: auto;
+    }
+
+    .left-panel {
+      width: 25%;
+      border-right: 1px solid #eee;
+    }
+
+    .center-panel {
+      width: 50%;
+      border-right: 1px solid #eee;
+    }
+
+    .right-panel {
+      width: 25%;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+      opacity: 1;
+      transition: opacity 0.4s ease;
+      user-select: none;
+    }
+
+    .calendar.fade-out {
+      opacity: 0;
+    }
+
+    .calendar div {
+      text-align: center;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .calendar div:hover:not(.disabled):not(.selected) {
+      background: #eef3ff;
+      transform: scale(1.05);
+    }
+
+    .calendar .selected {
+      background-color: #fdeacc;
+      border-bottom: 3px solid green;
+      font-weight: bold;
+    }
+
+    .calendar .disabled {
+      color: #ccc;
+      cursor: default;
+      background: transparent !important;
+      pointer-events: none;
+    }
+
+    .month-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 18px;
+      margin-top: 10px;
+      user-select: none;
+    }
+
+    /* Styled arrows as buttons */
+    .month-nav span {
+      background: #2563eb;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.6);
+      transition: background 0.3s ease;
+    }
+
+    .month-nav span:hover {
+      background: #1e40af;
+    }
+
+    .summary-box h3 {
+      margin-bottom: 20px;
+    }
+
+    .summary-item {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .cost {
+      margin-top: 40px;
+      font-size: 15px;
+      border-top: 1px dotted #ccc;
+      padding-top: 10px;
+    }
+
+    .cost div {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .total {
+      font-weight: bold;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 28px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #555;
+      transition: color 0.3s ease;
+      user-select: none;
+    }
+
+    .close-btn:hover {
+      color: #111;
+    }
+
+    .icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    .back-btn {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #2563eb;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .back-btn:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Button to open modal -->
+<button class="open-modal-btn" onclick="openModal()">click</button>
+
+
+<!-- Modal Structure -->
+<div class="modal" id="bookingModal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">×</span>
+
+    <!-- Left -->
+    <div class="left-panel">
+      <div class="icon">📝</div>
+      <h3>Select Date & Time</h3>
+      <p>Please select date and time for your appointment</p>
+      <div class="back-btn" onclick="alert('Going back')">← Back</div>
+      <div style="margin-top: 30px;">
+        <p style="font-size: 14px;">Questions?</p>
+        <a href="tel:8589393746" style="color: #2563eb; font-size: 14px;">Call (858) 939-3746 for help</a>
+      </div>
+    </div>
+
+    <!-- Center -->
+    <div class="center-panel">
+      <div class="month-nav">
+        <span id="prevMonth" title="Previous Month">←</span>
+        <strong id="monthYear">May 2025</strong>
+        <span id="nextMonth" title="Next Month">→</span>
+      </div>
+      <div class="calendar" id="calendarGrid">
+        <!-- Days injected via JS -->
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div class="right-panel">
+      <div class="summary-box">
+        <h3>Summary</h3>
+        <div class="summary-item">Luxury Spa</div>
+        <div class="cost">
+          <div><span>Luxury Spa</span><span>$75.00</span></div>
+          <div class="total"><span>Total Price</span><span>$75.00</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script -->
+<script>
+  const modal = document.getElementById('bookingModal');
+  const calendarGrid = document.getElementById('calendarGrid');
+  const monthYear = document.getElementById('monthYear');
+  const prevMonthBtn = document.getElementById('prevMonth');
+  const nextMonthBtn = document.getElementById('nextMonth');
+document.querySelector('.open-modal-btn').addEventListener('click', openModal);
+
+  let now = new Date();
+  let currentMonth = now.getMonth();
+  let currentYear = now.getFullYear();
+  let selectedDate = null;
+
+  const days = ['M','T','W','T','F','S','S'];
+
+  function openModal() {
+    modal.style.display = 'flex';
+    generateCalendar(currentMonth, currentYear);
+  }
+
+  function closeModal() {
+    modal.style.animation = "fadeOutModal 0.3s forwards";
+    setTimeout(() => {
+      modal.style.display = 'none';
+      modal.style.animation = "fadeInModal 0.3s forwards";
+    }, 300);
+  }
+
+  function generateCalendar(month, year) {
+    calendarGrid.classList.add('fade-out');
+
+    setTimeout(() => {
+      calendarGrid.innerHTML = "";
+
+      // Weekday headers
+      days.forEach(d => {
+        const dayEl = document.createElement('div');
+        dayEl.innerText = d;
+        dayEl.style.fontWeight = "bold";
+        dayEl.style.color = "#555";
+        calendarGrid.appendChild(dayEl);
+      });
+
+      // First day of month (Sunday=0)
+      const firstDay = new Date(year, month, 1).getDay();
+      // Adjust for Monday start (JS Sunday=0)
+      const offset = firstDay === 0 ? 6 : firstDay - 1;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      // Empty cells before first day
+      for (let i = 0; i < offset; i++) {
+        const empty = document.createElement('div');
+        calendarGrid.appendChild(empty);
+      }
+
+      // Actual days
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dayEl = document.createElement('div');
+        dayEl.innerText = i;
+
+        const date = new Date(year, month, i);
+
+        // Disable past dates before today
+        if (date < new Date(now.getFullYear(), now.getMonth(), now.getDate())) {
+          dayEl.classList.add('disabled');
+        } else {
+          dayEl.addEventListener('click', () => {
+            selectDate(dayEl, date);
+          });
+        }
+
+        // Highlight selected date
+        if (selectedDate &&
+            selectedDate.getFullYear() === year &&
+            selectedDate.getMonth() === month &&
+            selectedDate.getDate() === i) {
+          dayEl.classList.add('selected');
+        }
+
+        calendarGrid.appendChild(dayEl);
+      }
+
+      // Update month-year display
+      const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+      monthYear.textContent = `${monthNames[month]} ${year}`;
+
+      calendarGrid.classList.remove('fade-out');
+    }, 400); // match transition duration
+  }
+
+  function selectDate(dayElement, date) {
+    // Remove previous selection highlight
+    const prevSelected = calendarGrid.querySelector('.selected');
+    if (prevSelected) prevSelected.classList.remove('selected');
+
+    // Add highlight to clicked date
+    dayElement.classList.add('selected');
+    selectedDate = date;
+
+    // Optional: you can update right panel or elsewhere with selected date info
+  }
+
+  prevMonthBtn.addEventListener('click', () => {
+    if (currentMonth === 0) {
+      currentMonth = 11;
+      currentYear--;
+    } else {
+      currentMonth--;
+    }
+    generateCalendar(currentMonth, currentYear);
+  });
+
+  nextMonthBtn.addEventListener('click', () => {
+    if (currentMonth === 11) {
+      currentMonth = 0;
+      currentYear++;
+    } else {
+      currentMonth++;
+    }
+    generateCalendar(currentMonth, currentYear);
+  });
+</script>
+
+</body>
+</html>
